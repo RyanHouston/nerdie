@@ -1,4 +1,5 @@
 logs/*
+logs/channels/*
 db/*
 node_modules/*
 config.json

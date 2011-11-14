@@ -13,6 +13,11 @@
     "logs": "logs",
     "delayAfterConnect": 1500,
     "plugins": {
+        "logger": {
+          "enabled": true,
+          "dir": "logs/channels",
+          "channels": ["#nerdie"]
+        },
         "tell": {
           "prompt": ""
         },

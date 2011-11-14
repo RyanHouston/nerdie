@@ -5,6 +5,7 @@ var fs = require('fs');
 var NerdieInterface = require('nerdie_interface.js');
 var logDir;
 var plugin;
+var enabledChannels = [];
 
 function Logger(parentNerdie) {
   this.pluginInterface = new NerdieInterface(parentNerdie, this);
@@ -20,6 +21,11 @@ function Logger(parentNerdie) {
     logDir = parentNerdie.config.plugins.logger.dir;
     console.log("Logger plugin logging in " + logDir);
   }
+
+  if (parentNerdie.config.plugins.logger.channels) {
+    enabledChannels = parentNerdie.config.plugins.logger.channels;
+  }
+
 }
 
 Logger.prototype.init = function () {
@@ -42,6 +48,10 @@ Logger.prototype.logMessage = function(msg) {
 };
 
 Logger.prototype.writeToLog = function (source, msg) {
+  if (!this.isEnabledForSource(source)) {
+    return false;
+  }
+
   var now = new Date();
   var location = path.join(logDir, source);
   var file = path.join( location, now.strftime( '%Y-%m-%d.log' ) );
@@ -56,8 +66,16 @@ Logger.prototype.writeToLog = function (source, msg) {
     log.end();
   });
 
+  return true;
 };
 
+Logger.prototype.isEnabledForSource = function (source) {
+  if (enabledChannels.indexOf(source) > -1) {
+    return true;
+  }
+
+  return false;
+};
 
 Logger.prototype.logJoined = function (msg) {
   var time = plugin.getTimestamp();
