@@ -1,9 +1,9 @@
 var NerdieInterface = require('nerdie_interface.js')
-  , config = null;
+  , admins = null;
 
 function Reload(parentNerdie) {
 	this.pluginInterface = new NerdieInterface(parentNerdie, this);
-	config = (parentNerdie.config.admins) ? parentNerdie.config.admins : [];
+	admins = (parentNerdie.config.admins) ? parentNerdie.config.admins : [];
 }
 
 Reload.prototype.init = function () {
@@ -14,7 +14,7 @@ Reload.prototype.init = function () {
 };
 
 Reload.prototype.reload = function(msg) {
-	if (config.admins.indexOf(msg.user) === -1) {
+	if (admins.indexOf(msg.user) === -1) {
 		msg.msg('You do not have permissions for reloading.');
 		return;
 	}
