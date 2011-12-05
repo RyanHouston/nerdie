@@ -33,11 +33,11 @@ var Logger = function(parentNerdie) {
     }
 
     return false;
-  };
+  }
 
   function getTimestamp() {
-    var date = new Date();
-    var hours = date.getHours();
+    var date    = new Date();
+    var hours   = date.getHours();
     var minutes = date.getMinutes();
 
     if (hours < 10) {
@@ -58,38 +58,41 @@ var Logger = function(parentNerdie) {
       return false;
     }
 
-    var now = new Date();
-    var location = path.join(logDir, source);
-    var file = path.join( location, now.strftime( '%Y-%m-%d.log' ) );
+    var now       = new Date();
+    var location  = path.join(logDir, source);
+    var file      = path.join( location, now.strftime( '%Y-%m-%d.log' ) );
+
     path.exists( location, function( exists ) {
       var log;
+
       if (! exists ) {
         console.log("Logger plugin creating path: " + location);
         fs.mkdirSync( location, 0755 );
       }
+
       log = fs.createWriteStream ( file, { flags: 'a' });
       log.write( msg + '\n');
       log.end();
     });
 
     return true;
-  };
+  }
 
   function logMessage(msg) {
     writeToLog(msg.source, msg);
-  };
+  }
 
   function logJoined(msg) {
     var time = getTimestamp();
     var out = time + ' ' + msg.user + " has joined " + msg.source;
     writeToLog(msg.source, out);
-  };
+  }
 
   function logLeft(msg) {
     var time = getTimestamp();
     var out = time + ' ' + msg.user + " has left " + msg.source;
     writeToLog(msg.source, out);
-  };
+  }
 
   function registerPatterns() {
     pluginInterface.registerPattern(
@@ -115,7 +118,6 @@ var Logger = function(parentNerdie) {
     init:             init,
     logMessage:       logMessage,
   };
-
   return that;
 };
 
