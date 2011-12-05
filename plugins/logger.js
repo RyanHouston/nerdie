@@ -6,15 +6,28 @@ var NerdieInterface = require('nerdie_interface.js');
 var Logger = function(parentNerdie) {
 
   // Private variables
-  var that = {};
+  var that            = {};
   var pluginInterface = new NerdieInterface(parentNerdie, that);
-  var logEnabled = false;
-  var logDir = "logs";
+  var logEnabled      = false;
+  var logDir          = "logs";
   var enabledChannels = [];
 
-  that.pluginInterface = pluginInterface;
+  if (parentNerdie.config.plugins.logger.enabled) {
+    logEnabled = true;
+  }
 
-  var _isEnabledForSource = function (source) {
+  if (parentNerdie.config.plugins.logger.dir) {
+    logDir = parentNerdie.config.plugins.logger.dir;
+    console.log("Logger plugin logging in " + logDir);
+  }
+
+  if (parentNerdie.config.plugins.logger.channels) {
+    enabledChannels = parentNerdie.config.plugins.logger.channels;
+    console.log("Logging channels: " + enabledChannels);
+  }
+
+
+  function isEnabledForSource(source) {
     if (enabledChannels.indexOf(source) > -1) {
       return true;
     }
@@ -22,7 +35,7 @@ var Logger = function(parentNerdie) {
     return false;
   };
 
-  var _getTimestamp = function () {
+  function getTimestamp() {
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -40,8 +53,8 @@ var Logger = function(parentNerdie) {
     return time;
   };
 
-  var _writeToLog = function (source, msg) {
-    if (!_isEnabledForSource(source)) {
+  function writeToLog(source, msg) {
+    if (!isEnabledForSource(source)) {
       return false;
     }
 
@@ -62,30 +75,26 @@ var Logger = function(parentNerdie) {
     return true;
   };
 
-  // Public function definitions
-  var logMessage = function(msg) {
-    _writeToLog(msg.source, msg);
+  function logMessage(msg) {
+    writeToLog(msg.source, msg);
   };
-  that.logMessage = logMessage;
 
-  var logJoined = function (msg) {
-    var time = _getTimestamp();
+  function logJoined(msg) {
+    var time = getTimestamp();
     var out = time + ' ' + msg.user + " has joined " + msg.source;
-    _writeToLog(msg.source, out);
+    writeToLog(msg.source, out);
   };
-  that.logJoined = logJoined;
 
-  var logLeft = function (msg) {
-    var time = _getTimestamp();
+  function logLeft(msg) {
+    var time = getTimestamp();
     var out = time + ' ' + msg.user + " has left " + msg.source;
-    _writeToLog(msg.source, out);
+    writeToLog(msg.source, out);
   };
-  that.logLeft = logLeft;
 
-  var _registerPatterns = function() {
+  function registerPatterns() {
     pluginInterface.registerPattern(
       /.*/,
-      that.logMessage
+      logMessage
     );
     pluginInterface.userJoin( function(msg) {
       logJoined(msg);
@@ -95,27 +104,17 @@ var Logger = function(parentNerdie) {
     });
   }
 
-  var init = function() {
+  function init() {
     if (logEnabled) {
-      _registerPatterns();
+      registerPatterns();
     }
   }
-  that.init = init;
 
-
-  if (parentNerdie.config.plugins.logger.enabled) {
-    logEnabled = true;
-  }
-
-  if (parentNerdie.config.plugins.logger.dir) {
-    logDir = parentNerdie.config.plugins.logger.dir;
-    console.log("Logger plugin logging in " + logDir);
-  }
-
-  if (parentNerdie.config.plugins.logger.channels) {
-    enabledChannels = parentNerdie.config.plugins.logger.channels;
-    console.log("Logging channels: " + enabledChannels);
-  }
+  that = {
+    pluginInterface:  pluginInterface,
+    init:             init,
+    logMessage:       logMessage,
+  };
 
   return that;
 };
